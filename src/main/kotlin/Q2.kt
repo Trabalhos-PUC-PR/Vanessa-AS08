@@ -1,31 +1,42 @@
 fun Q2main() {
     val totalSims = 100
 
-    val probabilidades = cumulativeProbabilities(3.0, 7)
-    val clientes = List(totalSims) { getQntCliente(probabilidades, 8) }
+    val probabilidades = cumulativeProbabilities(2.6, 8)
+    val clientesNoDia = List(totalSims) { getQntCliente(probabilidades, 8) }
     val produtosProduzidos = List(totalSims) { getProdutosProduzidos() }
 
     var estoque = 0
-    var lucroMedio = 0
+    var lucro = 0
     val lucroDiario: ArrayList<Int> = ArrayList()
 
-    for(index in 0..< totalSims) {
-        estoque += produtosProduzidos[index];
-        var lucro = 0
-        for (cliente in 0..clientes[index]) {
+    for(dia in 0..< totalSims) {
+        val recebimento = produtosProduzidos[dia];
+        estoque += recebimento
+        var lucroDoDia = 0
+        var vendas = 0
+        for (cliente in 0..clientesNoDia[dia]) {
             if(estoque == 0)
                 continue
             if (isClienteGettingProduto()) {
                 estoque -= 1
-                lucro += 100
+                lucroDoDia += 100
+                vendas += 1
             } else {
-                lucro -= 40
+                lucroDoDia -= 40
             }
         }
-        lucroMedio+=lucro
-        lucroDiario.add(lucro)
+        lucro+=lucroDoDia
+        lucroDiario.add(lucroDoDia)
+//        println("Recebido: $recebimento | Vendas: $vendas | Estoque: $estoque | Lucro: $lucro | Lucro Diario: $lucroDoDia | Clientes do dia: ${clientesNoDia[dia]}")
     }
-    plotQQ(totalSims, lucroDiario, "q2-lucroDiario", "Lucro Diário", "Estoque médio de %d, Lucro médio de %d".format(estoque/totalSims, lucroMedio/totalSims))
+
+    println("Média clientes: ${ clientesNoDia.reduce { acc, i -> acc + i } / totalSims }")
+
+    plotQQ(totalSims,
+        lucroDiario,
+        "q2-lucroDiario",
+        "Lucro Diário",
+        "Estoque final de %d, Lucro diário médio de %d".format(estoque, lucro/totalSims))
 }
 
 fun isClienteGettingProduto(): Boolean {
